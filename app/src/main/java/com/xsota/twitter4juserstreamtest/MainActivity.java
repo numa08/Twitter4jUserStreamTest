@@ -1,14 +1,13 @@
 package com.xsota.twitter4juserstreamtest;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import twitter4j.StallWarning;
 import twitter4j.Status;
@@ -21,12 +20,16 @@ import twitter4j.conf.ConfigurationBuilder;
 
 public class MainActivity extends AppCompatActivity {
 
+  ListView listView;
+  ArrayAdapter<String> adapter;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-    setSupportActionBar(toolbar);
+    listView = (ListView) findViewById(R.id.list);
+    adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+    listView.setAdapter(adapter);
 
     String consumerKey = "ここに";
     String consumerSecret = "あなたの";
@@ -44,8 +47,13 @@ public class MainActivity extends AppCompatActivity {
 
     StatusListener listener = new StatusListener(){
       @Override
-      public void onStatus(Status status) {
-        Log.i("UserName: "+status.getUser().getName(),"Tweet: "+status.getText());
+      public void onStatus(final Status status) {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+          @Override
+          public void run() {
+            adapter.add("UserName: "+status.getUser().getName() + " Tweet: "+status.getText());
+          }
+        });
       }
 
       @Override
@@ -68,16 +76,6 @@ public class MainActivity extends AppCompatActivity {
     twitterStream.addListener(listener);
     twitterStream.user();
 
-
-
-    FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-    fab.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-            .setAction("Action", null).show();
-      }
-    });
   }
 
   @Override
